@@ -1,0 +1,43 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}Title for base.html{% endblock %}
+
+{% block navbar %}
+<div class="navbar navbar-fixed-top">
+	<p>Inside</p>
+</div>
+{% endblock %}
+
+{% block content %}
+	<div class="well">
+		<div class="row">
+			<div class="col-sm">
+				<table class="table">
+					<thead>
+						<tr>
+							{% for i in range(1,session['teams']+1) %}
+								<th>t{{ i }}</td>
+							{% endfor %}
+						</tr>
+					</thead>
+					<tbody>
+						{% for pos in 'QRRWWTFFDBB' %}
+							<tr>
+								{% for i in range(session['teams']) %}
+									<td>{{ pos }}</td>
+								{% endfor %}
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<form action="" method="post" name="home" class="form">
+		{% for player, pntup in player_dct.items() %}
+			<button class="btn btn-primary" type="submit" value="{{ player }}" name="button">
+				{{ player }} {{ pntup.rank }} {{ pntup.name }}
+			</button>
+		{% endfor %}
+	</form>
+{% endblock %}

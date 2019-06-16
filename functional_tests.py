@@ -16,10 +16,12 @@ class draftTest(unittest.TestCase):
 
     def test_if_team_selection_buttons_are_present(self):
         '''
-        user is provided a selection of 3 buttons,
-         corresponding to the number of teams in the draft
+        user is provided a selection of buttons,
+         who's value corresponds to the number of teams in the draft
         '''
-        pass
+
+        self.browser.get('http://localhost:5000')
+        assert len(self.browser.find_elements_by_xpath('//button')) > 0
 
 
 if __name__ == '__main__':

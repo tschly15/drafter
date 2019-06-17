@@ -1,19 +1,21 @@
+import json
+import redis
 import common
 from flask import Flask, request, redirect, url_for, session, render_template
 from flask_bootstrap import Bootstrap
+from flask_session import Session
 
 # setup flask
 app = Flask(__name__)
-Bootstrap(app)
-
 app.config.update(
+    DEBUG = True,
+    SESSION_TYPE = 'redis',
     SECRET_KEY='aldkfahbnadjllakdjfladif[qpqi34pvmcwh;pgjiern',
-    DEBUG = True
 )
 
-@app.route('/test', methods=['GET'])
-def test():
-    return "<html><title>Inside Draft App</title><h1>Draft App</h1><p>Welcome</p></html>"
+Bootstrap(app)
+Session(app)
+
 
 @app.route("/", methods=['GET','POST'])
 def index():
@@ -26,6 +28,8 @@ def index():
 
 @app.route("/display_players", methods=['GET','POST'])
 def display_players():
+    #enc = encoder()
+    #print enc.encode(sc)
     if request.method == 'GET':
         session['player_dct'] = common.build_players(refresh=False)
         session['tester'] = 'one'
@@ -39,5 +43,20 @@ def display_players():
         print(session['player_dct'])
 
     return render_template('display_players.html', player_dct=session['player_dct'], session=session)
+
+    '''
+    r = redis.StrictRedis(host='localhost', port=6379, db=0)
+
+    images= [
+        {'type':'big', 'url':'....'},
+        {'type':'big', 'url':'....'},
+        {'type':'big', 'url':'....'},
+    ]
+
+    json_images = json.dumps(images)
+    r.set('images', json_images)
+    unpacked_images = json.loads(r.get('images'))
+    images == unpacked_images
+    '''
 
 app.run()

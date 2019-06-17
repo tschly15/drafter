@@ -1,11 +1,19 @@
 #!/usr/bin/python
 import os
 import re
+import json
 import requests
 from collections import namedtuple, OrderedDict
 from bs4 import BeautifulSoup as bSoup
 
 pos_regex = re.compile('([A-Z]{2,3})[0-9]{1,3}')
+
+class encoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, simpleClass):
+            return obj.__dict__
+        else:
+            return json.JSONEncoder.default(self, obj)
 
 def build_players(refresh=True):
 
@@ -28,7 +36,6 @@ def build_players(refresh=True):
 
 
     players_dct = OrderedDict()
-    player_nt = namedtuple('player_nt', 'name tier pos rank pos_rank')
 
     for row in base_body.findAll('tr'):
         try:
@@ -42,13 +49,16 @@ def build_players(refresh=True):
         elif cls.startswith('mpb-player'):
             cells = row.findAll('td')
 
-            rank = str(cells[0].text)
             pos_rank = str(cells[3].text)
-            pos = re.search(pos_regex, pos_rank).group(1)
             name = str(cells[2].find('a').find('span', attrs={'class':'full-name'}).text)
             key_name = name.lower().replace(' ','_')
-        
-            players_dct[key_name] = player_nt(name, tier, pos, rank, pos_rank)
+
+            players_dct[key_name] = {
+                'name': name,
+                'pos_rank': pos_rank,
+                'rank': str(cells[0].text),
+                'pos': re.search(pos_regex, pos_rank).group(1),
+            }
 
         #### REMOVE THIS ####
         if len(players_dct) > 20:

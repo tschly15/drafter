@@ -1,0 +1,12 @@
+<html>
+<title>Test</title>
+<h1>Index</h1>
+<form method=post>
+	{% for v in form._fields.values() %}
+	<dl>
+		{{ v.label }} {{ v }}
+	</dl>
+	{% endfor %}
+	<p><input type=submit value=Register></p>
+</form>
+</html>

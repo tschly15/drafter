@@ -1,0 +1,16 @@
+<html>
+<title>Test</title>
+<h1>Index2</h1>
+<div class="well">
+	{% for v in form._fields.values() %}
+	<dl>
+		{{ v.label }} {{ v.data }}
+	</dl>
+	{% endfor %}
+</div>
+
+<form method=post>
+	<p><input type=submit value="Confirm Settings"></p>
+</form>
+
+</html>

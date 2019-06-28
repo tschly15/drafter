@@ -7,12 +7,3 @@ def pick_to_team(num_teams, pick):
         if not team_id:
             team_id = num_teams
     return team_id
-
-
-if __name__ == '__main__':
-    players_dct = build_players(refresh=False)
-    import json
-    with open('pl.py','w') as f:
-        f.write( 'players = %s\n' % json.dumps(players_dct, indent=2) )
-
-

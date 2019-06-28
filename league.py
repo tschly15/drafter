@@ -22,26 +22,30 @@ class league_cls(object):
     url = 'http://www.fantasypros.com/nfl/rankings/ppr-cheatsheets.php'
     headers = {'User-Agent': 'Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:45.0) Gecko/20100101 Firefox/45.0'}
 
-    def __init__(self, session):
+    def __init__(self, session=None, reinit=None):
+        if reinit:
+            self.__dict__.update(reinit)
 
-        self.num_teams = session.pop('num_teams')
-        self.num_rounds = session.pop('num_rounds')
+        else:
+            #initial value is accurate, then session['num_teams'] is lost
+            self.num_teams = session.pop('num_teams')
+            self.rounds = session.pop('num_rounds')
 
-        self.keepers = []
-        self.current_pick = 1
+            self.keepers = []
+            self.current_pick = 1
 
-        #TODO: define the full path
-        self.cache = 'response.cache'
+            #TODO: define the full path
+            self.cache = 'response.cache'
 
-        #list containing team objects
-        self.teams = [ team_cls(str(idx))
-                       for idx in range(1, int(self.num_teams)+1)]
+            #list containing team objects
+            self.teams = [ team_cls(str(idx))
+                           for idx in range(1, int(self.num_teams)+1)]
 
-        #ordered dict containing player objects
-        self.players = OrderedDict()
-        self.identify_players()
+            #ordered dict containing player objects
+            self.players = OrderedDict()
+            self.identify_players()
 
-        self.positions = self.define_positions(session)
+            self.positions = self.define_positions(session)
 
     def to_json(self):
         key = '__{0}__'.format(self.__class__.__name__)
@@ -69,10 +73,11 @@ class league_cls(object):
 
         for row in base_body.findAll('tr'):
             try:
-                cls = row.get('class')[0]
+                #cls = row.get('class')[0]
+                cls = row.get('class').split()[0]
             except IndexError:
                 continue
-
+                
             if cls.count('tier-row'):
                 tier = str(row.find('td').text.split(' ',1)[1])
 
@@ -83,7 +88,7 @@ class league_cls(object):
                 key_name = player_obj.player_name.lower().replace(' ','_')
                 self.players[key_name] = player_obj
 
-                if len(self.players) == 2:
+                if len(self.players) == 20:
                     return
 
     def __str__(self):
@@ -91,7 +96,7 @@ class league_cls(object):
 
     def get_html(self, refresh=True):
 
-        if refresh or not os.path.isfile(self.cache):
+        if refresh or not (os.path.isfile(self.cache) and os.path.getsize(self.cache)):
             response = requests.get(self.url, headers=self.headers)
             try:
                 soup = b4(response.text, "lxml")
@@ -99,7 +104,7 @@ class league_cls(object):
                 soup = b4(response.text)
 
             with open(self.cache,'w') as f:
-                f.write(str(response.text))
+                f.write(response.text.encode('utf8'))
 
         else: #this is merely to aid in testing
             try:
@@ -137,9 +142,7 @@ def deserialize(o):
     #TODO: either a mixin or method with identical signature for each class
     if '__league_cls__' in o:
         dct = o['__league_cls__']
-        lea = league_cls(dct)
-        vars(lea).update(dct)
-        return lea
+        return league_cls(reinit=dct)
     elif '__team_cls__' in o:
         dct = o['__team_cls__']
         return team_cls(dct['team_id'], dct['team_name'])

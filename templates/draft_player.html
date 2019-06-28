@@ -1,0 +1,43 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}Title for base.html{% endblock %}
+
+{% block navbar %}
+<div class="navbar navbar-fixed-top">
+	<p>Inside</p>
+</div>
+{% endblock %}
+
+{% block content %}
+	<div class="well">
+		<div class="row">
+			<div class="col-sm">
+				<table class="table">
+					<thead>
+						<tr>
+							{% for team in league.teams %}
+								<th>{{ team.team_name }}</td>
+							{% endfor %}
+						</tr>
+					</thead>
+					<tbody>
+						{% for pos in league.positions %}
+							<tr>
+								{% for i in range(league.num_teams | int) %}
+									<td>{{ pos }}</td>
+								{% endfor %}
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<form action="" method="post" name="home" class="form">
+		{% for pk, player in league.players.iteritems() %}
+			<button class="btn btn-primary" type="submit" value="{{ pk }}" name="button">
+				{{ player.overall_rank }} {{ player.tier }} {{ player.player_name }} {{ player.position_rank }}
+			</button>
+		{% endfor %}
+	</form>
+{% endblock %}

@@ -1,8 +1,8 @@
 import json
 import redis
 import common
-from forms import league_fields
 from league import league_cls
+from forms import league_fields
 from flask_session import Session
 from flask_bootstrap import Bootstrap
 from wtforms import Form, validators, SelectField
@@ -30,7 +30,6 @@ def index():
     if request.method == 'GET':
         return render_template('lea.html', form=form)
 
-    #proceed = request.form['button']
     session['pick'] = 1
 
     #capture the necessary league fields
@@ -38,37 +37,27 @@ def index():
                            for fld, val in form._fields.items() ]))
 
     session['league'] = league_cls(session).to_json()
-    return render_template('confirm.html', form=form)
+    return render_template('confirm.html', form=form, session=session)
 
-@app.route('/confirm', methods=['GET','POST'])
-def confirm():
-    '''display all lg info'''
-
-    confirmed = False
-    if confirmed:
-        return redirect(url_for('draft_players'))
-
-    return render_template('lea2.html', form=form)
 
 @app.route("/draft_player", methods=['GET','POST'])
 def draft_player():
+    print(league_cls.from_json(session['league']))
 
-    if request.method == 'GET':
-        session['player_dct'] = common.build_players(refresh=False)
-        
-    else:
+    if request.method == 'POST':
         session['league'] = league_cls.from_json(session['league'])
 
         player = request.form['button']
         pobj = session['league'].players[player] #obj of player_cls
 
+        #do these values stick when league goes back to json?
         pobj.pick = session['pick']
         pobj.team_id = common.pick_to_team(session['num_teams'], session['pick'])
 
         session['pick'] += 1
         session['league'] = session['league'].to_json()
 
-    return render_template('display_players.html', player_dct=session['player_dct'], session=session)
+    return render_template('display_players.html', session=session)
 
     '''
     r = redis.StrictRedis(host='localhost', port=6379, db=0)
@@ -85,5 +74,5 @@ def draft_player():
     images == unpacked_images
     '''
 
-app.run()
+app.run(debug=True)
 #app.run(debug=True, port=5001)

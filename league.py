@@ -25,7 +25,7 @@ class league_cls(object):
     def __init__(self, session):
 
         self.num_teams = session.pop('num_teams')
-        self.rounds = session.pop('num_rounds')
+        self.num_rounds = session.pop('num_rounds')
 
         self.keepers = []
         self.current_pick = 1
@@ -42,7 +42,6 @@ class league_cls(object):
         self.identify_players()
 
         self.positions = self.define_positions(session)
-        print(self.positions)
 
     def to_json(self):
         key = '__{0}__'.format(self.__class__.__name__)
@@ -84,7 +83,7 @@ class league_cls(object):
                 key_name = player_obj.player_name.lower().replace(' ','_')
                 self.players[key_name] = player_obj
 
-                if len(self.players) == 20:
+                if len(self.players) == 2:
                     return
 
     def __str__(self):
@@ -138,7 +137,7 @@ def deserialize(o):
     #TODO: either a mixin or method with identical signature for each class
     if '__league_cls__' in o:
         dct = o['__league_cls__']
-        lea = league_cls(dct['num_teams'])
+        lea = league_cls(dct)
         vars(lea).update(dct)
         return lea
     elif '__team_cls__' in o:

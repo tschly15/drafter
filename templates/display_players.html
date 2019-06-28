@@ -9,18 +9,19 @@
 
 {% block content %}
 	<div class="well">
+	<p>{% session['teams'] %}</p>
 		<div class="row">
 			<div class="col-sm">
 				<table class="table">
 					<thead>
 						<tr>
-							{% for i in range(1,session['teams']+1) %}
-								<th>t{{ i }}</td>
+							{% for team in session['teams'] %}
+								<td>{{ team.team_id }} {{ team.team_name }}</td>
 							{% endfor %}
 						</tr>
 					</thead>
 					<tbody>
-						{% for pos in 'QRRWWTFFDBB' %}
+						{% for pos in session['league'].positions %}
 							<tr>
 								{% for i in range(session['teams']) %}
 									<td>{{ pos }}</td>
@@ -34,9 +35,9 @@
 	</div>
 
 	<form action="" method="post" name="home" class="form">
-		{% for player, pntup in player_dct.items() %}
+		{% for player, player_dct in session['league'].players.items() %}
 			<button class="btn btn-primary" type="submit" value="{{ player }}" name="button">
-				{{ player }} {{ pntup.rank }} {{ pntup.name }}
+				{{ player_dct.player_name }} {{ player_dct.overall_rank }} {{ player_dict.position_rank }}
 			</button>
 		{% endfor %}
 	</form>

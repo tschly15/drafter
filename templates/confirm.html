@@ -1,6 +1,9 @@
 <html>
+<head>
 <title>Test</title>
 <h1>Index2</h1>
+</head>
+<body>
 <div class="well">
 	{% for v in form._fields.values() %}
 	<dl>
@@ -10,7 +13,9 @@
 </div>
 
 <form method=post>
+	<a href="{{ url_for('draft_player') }}">Confirm</a>
 	<p><input type=submit value="Confirm Settings"></p>
 </form>
 
+</body>
 </html>

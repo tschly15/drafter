@@ -14,7 +14,8 @@
 				<table class="table">
 					<thead>
 						<tr>
-							{% for team in league.teams %}
+							<td>b</td>
+							{% for team in league.teams|sort(attribute='team_id') %}
 								<th>{{ team.team_name }}</td>
 							{% endfor %}
 						</tr>
@@ -22,8 +23,13 @@
 					<tbody>
 						{% for pos in league.positions %}
 							<tr>
-								{% for i in range(league.num_teams | int) %}
-									<td>{{ pos }}</td>
+								<td>{{ pos }}</td>
+								{% for team in league.teams|sort(attribute='team_id') %}
+									<td>
+									{% for player in team.team_players[pos] %}
+										{{ player.player_name }}
+									{% endfor %}
+									</td>
 								{% endfor %}
 							</tr>
 						{% endfor %}
@@ -34,7 +40,7 @@
 	</div>
 
 	<form action="" method="post" name="home" class="form">
-		{% for pk, player in league.players.iteritems() %}
+		{% for pk, player in league.players.items() %}
 			<button class="btn btn-primary" type="submit" value="{{ pk }}" name="button">
 				{{ player.overall_rank }} {{ player.tier }} {{ player.player_name }} {{ player.position_rank }}
 			</button>

@@ -1,13 +1,13 @@
-#!bin/python ##
+#!Scripts/python
 import json
 import redis
-import common
 from league import league_cls
-from forms import league_fields
 from flask_session import Session
 from flask_bootstrap import Bootstrap
-from wtforms import Form, validators, SelectField
+from forms import league_fields, LeagueForm
 from flask import Flask, request, redirect, url_for, session, render_template
+
+#!/bin/python
 
 # setup flask
 app = Flask(__name__)
@@ -21,32 +21,21 @@ app.config.update(
 Bootstrap(app)
 Session(app)
 
-class LForm(Form):
-    for fld, form_nt in league_fields.iteritems(): ##
-        locals()[fld] = SelectField(form_nt.label, choices=form_nt.choices, validators=[validators.Required()])
-
-
 @app.route("/", methods=['GET','POST'])
 @app.route("/home", methods=['GET','POST'])
 def home():
 
-    #clean the session
-    for key in ('league','pick'):
-        try:
-            del session[key]
-        except:
-            pass
+    #ensure we begin with a clean session
+    for key in list(session):
+        del session[key]
 
-    form = LForm(request.form)
+    form = LeagueForm(request.form)
     if request.method == 'GET':
         return render_template('lea.html', form=form)
 
-    #proceed = request.form['button']
-    session['pick'] = 1
-
     #capture the necessary league fields
     session.update(dict([ (fld, val.data)
-                           for fld, val in form._fields.iteritems() ])) ##
+                           for fld, val in form._fields.items() ]))
     session['league'] = league_cls(session=session).to_json()
 
     return redirect(url_for('confirm'))
@@ -71,12 +60,13 @@ def draft_player():
     if request.method == 'POST':
 
         player = request.form['button']
-        pobj = league.players[player] #obj of player_cls
+        pobj = league.players.pop(player) #obj of player_cls
+        pobj.pick = league.current_pick
 
-        pobj.pick = session['pick']
-        pobj.team_id = common.pick_to_team(session['num_teams'], session['pick'])
+        team_id = league.pick_to_team()
+        league.teams[team_id].team_players[pobj.position].append(pobj)
 
-        session['pick'] += 1
+        league.current_pick += 1
         session['league'] = league.to_json()
 
     return render_template('draft_player.html', league=league)

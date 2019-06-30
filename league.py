@@ -3,7 +3,7 @@ import os
 import re
 import json
 import requests
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 try:
     from bs4 import BeautifulSoup as b4
 except ImportError:
@@ -38,8 +38,8 @@ class league_cls(object):
             self.cache = 'response.cache'
 
             #list containing team objects
-            self.teams = [ team_cls(str(idx))
-                           for idx in range(1, int(self.num_teams)+1)]
+            self.teams = [ team_cls(tid=idx)
+                           for idx in range(int(self.num_teams)) ]
 
             #ordered dict containing player objects
             self.players = OrderedDict()
@@ -56,9 +56,20 @@ class league_cls(object):
     def from_json(serialized):
         return json.loads(serialized, object_hook=deserialize)
 
+    def pick_to_team(self):
+        num_teams = int(self.num_teams)
+        pos = self.current_pick % num_teams
+        rnd = int((self.current_pick-1) / num_teams) + 1
+
+        if rnd % 2:
+            return pos-1 if pos else num_teams-1
+        
+        mod = pos % num_teams
+        return num_teams - mod if mod else 0
+
     def define_positions(self, session):
         positions = []
-        for fld in list(session.keys()):
+        for fld in list(session):
             if fld.startswith('num_'):
                 val = session.pop(fld)
                 for idx in range(int(val)):
@@ -72,11 +83,12 @@ class league_cls(object):
         base_body = base_div.find('table').find('tbody')
 
         for row in base_body.findAll('tr'):
-            try:
-                #cls = row.get('class')[0]
-                cls = row.get('class').split()[0]
-            except IndexError:
+            cls = row.get('class')
+            if not cls:
                 continue
+            elif isinstance(cls,str):
+                cls = cls.split()
+            cls = cls[0]
                 
             if cls.count('tier-row'):
                 tier = str(row.find('td').text.split(' ',1)[1])
@@ -88,7 +100,7 @@ class league_cls(object):
                 key_name = player_obj.player_name.lower().replace(' ','_')
                 self.players[key_name] = player_obj
 
-                if len(self.players) == 20:
+                if len(self.players) == 10:
                     return
 
     def __str__(self):
@@ -116,10 +128,15 @@ class league_cls(object):
 
 
 class team_cls(object):
-    def __init__(self, tid, name=""):
-        self.team_id = tid
-        self.team_name = name or "Team{0}".format(tid)
-
+    def __init__(self, tid=None, name="", reinit=None):
+        if reinit:
+            self.__dict__.update(reinit)
+        else:
+            self.team_id = str(tid)
+            self.team_name = name or "Team{0}".format(int(tid+1))
+            self.team_players = defaultdict(list)
+    def __str__(self):
+        return "{0}: {1}".format(self.team_id, self.team_players)
 
 class player_cls(object):
     pos_regex = re.compile('([A-Z]{1,3})[0-9]{1,3}')
@@ -145,7 +162,8 @@ def deserialize(o):
         return league_cls(reinit=dct)
     elif '__team_cls__' in o:
         dct = o['__team_cls__']
-        return team_cls(dct['team_id'], dct['team_name'])
+        dct['team_players'] = defaultdict(list, dct.pop('team_players'))
+        return team_cls(reinit=dct)
     elif '__player_cls__' in o:
         dct = o['__player_cls__']
         return player_cls(reinit=dct)

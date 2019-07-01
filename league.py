@@ -73,7 +73,7 @@ class league_cls(object):
             if fld.startswith('num_'):
                 val = session.pop(fld)
                 for idx in range(int(val)):
-                    positions.append(fld[4:].upper())
+                    positions.append((idx,fld[4:].upper()))
         return positions
 
     def identify_players(self):
@@ -99,9 +99,6 @@ class league_cls(object):
 
                 key_name = player_obj.player_name.lower().replace(' ','_')
                 self.players[key_name] = player_obj
-
-                if len(self.players) == 10:
-                    return
 
     def __str__(self):
         return json.dumps(self.__dict__, indent=2, cls=custom_encoder)
@@ -135,10 +132,16 @@ class team_cls(object):
             self.team_id = str(tid)
             self.team_name = name or "Team{0}".format(int(tid+1))
             self.team_players = defaultdict(list)
+    def get_player(self, pos, idx):
+        try:
+            return self.team_players[pos][idx].player_name
+        except (KeyError,IndexError):
+            return '-'
     def __str__(self):
         return "{0}: {1}".format(self.team_id, self.team_players)
 
 class player_cls(object):
+    #TODO: add the NFL team
     pos_regex = re.compile('([A-Z]{1,3})[0-9]{1,3}')
 
     def __init__(self, cell=None, tier=None, reinit=None):

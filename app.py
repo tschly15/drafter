@@ -33,11 +33,12 @@ def home():
     if request.method == 'GET':
         return render_template('lea.html', form=form)
 
-    #capture the necessary league fields
-    session.update(dict([ (fld, val.data)
-                           for fld, val in form._fields.items() ]))
-    session['league'] = league_cls(session=session).to_json()
+    for fld in form._fields:
+        value = form._fields[fld].object_data
+        label = form._fields[fld].label.text
+        session['settings_{0}'.format(fld)] = (label, value)
 
+    session.update(form.data)
     return redirect(url_for('confirm'))
 
 @app.route('/confirm', methods=['GET','POST'])
@@ -47,11 +48,13 @@ def confirm():
     if request.method == 'POST':
 
         if request.form.get('confirmed','') == 'True':
+            #capture the necessary league fields
+            session['league'] = league_cls(session=session).to_json()
             return redirect(url_for('draft_player'))
 
         return redirect(url_for('home'))
 
-    return render_template('confirm.html')
+    return render_template('confirm.html', session=session)
 
 @app.route("/draft_player", methods=['GET','POST'])
 def draft_player():

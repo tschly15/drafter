@@ -1,9 +1,8 @@
 #MAYBE TRY JSONPICKLE
 import os
-import re
 import json
 import requests
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 try:
     from bs4 import BeautifulSoup as b4
 except ImportError:
@@ -41,8 +40,8 @@ class league_cls(object):
             self.teams = [ team_cls(tid=idx)
                            for idx in range(int(self.num_teams)) ]
 
-            #ordered dict containing player objects
-            self.players = OrderedDict()
+            #dict containing rank as key and value of player object
+            self.players = {}
             self.identify_players()
 
             self.positions = self.define_positions(session)
@@ -86,7 +85,7 @@ class league_cls(object):
             cls = row.get('class')
             if not cls:
                 continue
-            elif isinstance(cls,str):
+            elif isinstance(cls,str): #unicode for py2
                 cls = cls.split()
             cls = cls[0]
                 
@@ -97,8 +96,8 @@ class league_cls(object):
                 cell = row.findAll('td')
                 player_obj = player_cls(cell=cell, tier=tier)
 
-                key_name = player_obj.player_name.lower().replace(' ','_')
-                self.players[key_name] = player_obj
+                self.players[player_obj.overall_rank] = player_obj
+            
 
     def __str__(self):
         return json.dumps(self.__dict__, indent=2, cls=custom_encoder)
@@ -138,25 +137,29 @@ class team_cls(object):
         except (KeyError,IndexError):
             return '-'
     def __str__(self):
-        return "{0}: {1}".format(self.team_id, self.team_players)
+        return json.dumps(self.__dict__, indent=2, cls=custom_encoder)
 
 class player_cls(object):
-    #TODO: add the NFL team
-    pos_regex = re.compile('([A-Z]{1,3})[0-9]{1,3}')
 
     def __init__(self, cell=None, tier=None, reinit=None):
         if reinit:
             self.__dict__.update(reinit)
         else:
             self.position_rank = str(cell[3].text)
+            
+            inp = cell[1].find('input')
+            self.position = inp.get('data-position')
+            self.nfl_team = inp.get('data-team')
 
-            self.position = re.search(self.pos_regex, self.position_rank).group(1)
             self.player_name = str(cell[2].find('a').find('span', attrs={'class':'full-name'}).text)
             self.overall_rank = str(cell[0].text)
 
             self.tier = tier
             self.pick = None #update html to use this value as a toggle
 
+    def __str__(self):
+        return json.dumps(self.__dict__, indent=2, cls=custom_encoder)
+            
 
 def deserialize(o):
     #TODO: either a mixin or method with identical signature for each class
@@ -172,11 +175,3 @@ def deserialize(o):
         return player_cls(reinit=dct)
 
     return o
-    #{u'__team_cls__': {u'team_id': 1, u'team_name': u'Team1'}}
-    #{u'__player_cls__': {u'overall_rank': u'1', u'position': u'RB', u'position_rank': u'RB1', u'player_name': u'Saquon Barkley', u'tier': u'1'}}
-
-#ll = league_cls(num_teams=12)
-#serialized = ll.to_json()
-
-#nl = league_cls.from_json(serialized)
-#print nl

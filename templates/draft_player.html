@@ -3,43 +3,49 @@
 
 {% block navbar %}
 <div class="navbar navbar-fixed-top">
-	<p>Inside</p>
+    <p>Inside</p>
 </div>
 {% endblock %}
 
 {% block content %}
-	<div class="well">
-		<div class="row">
-			<div class="col-sm">
-				<table class="table">
-					<thead>
-						<tr>
-							<th>b</th>
-							{% for team in league.teams|sort(attribute='team_id') %}
-								<th>{{ team.team_name }}</td>
-							{% endfor %}
-						</tr>
-					</thead>
-					<tbody>
-						{% for idx, pos in league.positions %}
-							<tr>
-								<td>{{ pos }}</td>
-								{% for team in league.teams|sort(attribute='team_id') %}
-									<td>{{ team.get_player(pos, idx) }}</td>
-								{% endfor %}
-							</tr>
-						{% endfor %}
-					</tbody>
-				</table>
-			</div>
+    <div class="well">
+        <div class="row">
+			<form action="" method="post" name="undo" class="form">
+				<button class="btn btn-primary" type="submit" value="UNDO" name="button">Undo</button>
+			</form>
 		</div>
-	</div>
+        <div class="row">
+            <div class="col-sm">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>b</th>
+                            {% for team in league.teams|sort(attribute='team_id') %}
+                                <th>{{ team.team_name }}</td>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for idx, pos in league.positions %}
+                            <tr>
+                                <td>{{ pos }}</td>
+                                {% for team in league.teams|sort(attribute='team_id') %}
+                                    <td>{{ team.get_player(pos, idx) }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
-	<form action="" method="post" name="home" class="form">
-		{% for pk, player in league.players.items() %}
-			<button class="btn btn-primary" type="submit" value="{{ pk }}" name="button">
-				{{ player.overall_rank }} {{ player.tier }} {{ player.player_name }} {{ player.position_rank }}
-			</button>
-		{% endfor %}
-	</form>
+    <form action="" method="post" name="home" class="form">
+        {% for rank in sorted_ranks %}
+            <button class="btn btn-primary" type="submit" value="{{ rank }}" name="button">
+                {{ league.players[rank|string].overall_rank }} {{ league.players[rank|string].tier }} {{ league.players[rank|string].position_rank }} {{ league.players[rank|string].player_name }} {{ league.players[rank|string].nfl_team }}
+            </button>
+        {% endfor %}
+    </form>
 {% endblock %}
+

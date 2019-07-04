@@ -1,21 +1,21 @@
-#add a default value for league settings
 from collections import namedtuple
 from wtforms import Form, validators, SelectField
 
 nt = namedtuple('form_data', 'label default choices')
 
 league_fields = {
-    'num_teams': nt('Teams', 10, [ (x,x) for x in range(6,15,2) ]),
+    'num_teams': nt('Teams', 6, [ (x,x) for x in range(6,15,2) ]),
     'num_rounds': nt('Rounds', 6, [ (x,x) for x in range(1,21) ]),
-    'num_kickers': nt('Kickers', 0, [ (x,x) for x in range(0,3) ]),
-    'num_qb': nt('Quarterbacks', 1, [ (x,x) for x in range(0,3) ]),
-    'num_rb': nt('Running Backs', 2, [ (x,x) for x in range(0,3) ]),
-    'num_wr': nt('Wide Receivers', 2, [ (x,x) for x in range(0,3) ]),
-    'num_te': nt('Tight Ends', 0, [ (x,x) for x in range(0,3) ]),
-    'num_wr/rb': nt('Flex: W/R', 0, [ (x,x) for x in range(0,3) ]),
-    'num_wr/rb/te': nt('Flex: W/R/T', 0, [ (x,x) for x in range(0,3) ]),
-    'num_wr/rb/te/qb': nt('SuperFlex: W/R/T/QB', 0, [ (x,x) for x in range(0,3) ]),
-    'num_def': nt('Defenses', 1, [ (x,x) for x in range(0,3) ]),
+    'num_K': nt('Kickers', 0, [ (x,x) for x in range(0,3) ]),
+    'num_QB': nt('Quarterbacks', 1, [ (x,x) for x in range(0,3) ]),
+    'num_RB': nt('Running Backs', 1, [ (x,x) for x in range(0,3) ]),
+    'num_WR': nt('Wide Receivers', 1, [ (x,x) for x in range(0,3) ]),
+    'num_TE': nt('Tight Ends', 0, [ (x,x) for x in range(0,3) ]),
+    'num_WR/RB': nt('Flex: W/R', 0, [ (x,x) for x in range(0,3) ]),
+    'num_WR/RB/TE': nt('Flex: W/R/T', 1, [ (x,x) for x in range(0,3) ]),
+    'num_WR/RB/TE/QB': nt('SuperFlex: W/R/T/QB', 0, [ (x,x) for x in range(0,3) ]),
+    'num_DST': nt('Defenses', 1, [ (x,x) for x in range(0,3) ]),
+    'num_BN': nt('Bench', 6, [ (x,x) for x in range(0,11) ]),
 }
 
 class LeagueForm(Form):
@@ -24,3 +24,4 @@ class LeagueForm(Form):
                                     default=form_nt.default,
                                     choices=form_nt.choices,
                                     validators=[validators.Required()])
+

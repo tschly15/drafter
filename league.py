@@ -1,4 +1,3 @@
-#MAYBE TRY JSONPICKLE
 import os
 import json
 import requests
@@ -29,9 +28,7 @@ class league_cls(object):
             #initial value is accurate, then session['num_teams'] is lost
             self.num_teams = session.pop('num_teams')
             self.rounds = session.pop('num_rounds')
-
-            self.keepers = []
-            self.current_pick = 1
+            self.keepers = session.pop('include_keepers')
 
             #TODO: define the full path
             self.cache = 'response.cache'
@@ -44,6 +41,8 @@ class league_cls(object):
             self.players = {}
             self.identify_players()
 
+            #link to player objs in order they were drafted
+            self.drafted = [] 
             self.positions = self.define_positions(session)
 
     def to_json(self):
@@ -56,9 +55,11 @@ class league_cls(object):
         return json.loads(serialized, object_hook=deserialize)
 
     def pick_to_team(self):
+        current_pick = len(self.drafted)
         num_teams = int(self.num_teams)
-        pos = self.current_pick % num_teams
-        rnd = int((self.current_pick-1) / num_teams) + 1
+
+        pos = current_pick % num_teams
+        rnd = int((current_pick-1) / num_teams) + 1
 
         if rnd % 2:
             return pos-1 if pos else num_teams-1
@@ -85,7 +86,7 @@ class league_cls(object):
             cls = row.get('class')
             if not cls:
                 continue
-            elif isinstance(cls,str): #unicode for py2
+            elif not isinstance(cls, (list,tuple)):
                 cls = cls.split()
             cls = cls[0]
                 
@@ -97,6 +98,9 @@ class league_cls(object):
                 player_obj = player_cls(cell=cell, tier=tier)
 
                 self.players[player_obj.overall_rank] = player_obj
+
+            if len(self.players) >= 15:
+                break
             
 
     def __str__(self):
@@ -131,13 +135,23 @@ class team_cls(object):
             self.team_id = str(tid)
             self.team_name = name or "Team{0}".format(int(tid+1))
             self.team_players = defaultdict(list)
-    def get_player(self, pos, idx):
+
+    def drop_player(self, rank):
+        for lst in self.team_players.values():
+            if lst.count(rank):
+                lst.remove(rank)
+                break
+
+    def get_player(self, league, pos, idx):
         try:
-            return self.team_players[pos][idx].player_name
+            rank = self.team_players[pos][idx]
+            return league.players[rank].player_name
         except (KeyError,IndexError):
             return '-'
+
     def __str__(self):
         return json.dumps(self.__dict__, indent=2, cls=custom_encoder)
+
 
 class player_cls(object):
 
@@ -151,11 +165,12 @@ class player_cls(object):
             self.position = inp.get('data-position')
             self.nfl_team = inp.get('data-team')
 
+            self.overall_rank = int(cell[0].text)
             self.player_name = str(cell[2].find('a').find('span', attrs={'class':'full-name'}).text)
-            self.overall_rank = str(cell[0].text)
 
             self.tier = tier
-            self.pick = None #update html to use this value as a toggle
+            self.pick = None
+            self.team_id = None
 
     def __str__(self):
         return json.dumps(self.__dict__, indent=2, cls=custom_encoder)
@@ -165,6 +180,9 @@ def deserialize(o):
     #TODO: either a mixin or method with identical signature for each class
     if '__league_cls__' in o:
         dct = o['__league_cls__']
+        for key in dct['players']:
+            player_obj = dct['players'].pop(key)
+            dct['players'][int(key)] = player_obj
         return league_cls(reinit=dct)
     elif '__team_cls__' in o:
         dct = o['__team_cls__']

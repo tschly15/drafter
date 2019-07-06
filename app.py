@@ -1,4 +1,5 @@
 #!Scripts/python
+###!bin/python
 import json
 import redis
 from league import league_cls
@@ -29,7 +30,7 @@ def home():
 
     form = LeagueForm(request.form)
     if request.method == 'GET':
-        return render_template('lea.html', form=form)
+        return render_template('league.html', form=form)
 
     for fld in form._fields:
         value = form._fields[fld].data
@@ -46,13 +47,44 @@ def confirm():
     if request.method == 'POST':
 
         if request.form.get('confirmed','') == 'True':
+
             #capture the necessary league fields
-            session['league'] = league_cls(session=session).to_json()
+            league = league_cls(session=session)
+            session['league'] = league.to_json()
+
+            if league.keepers == 'Y':
+                return redirect(url_for('keepers'))
+
             return redirect(url_for('draft_player'))
 
         return redirect(url_for('home'))
 
     return render_template('confirm.html', session=session)
+
+
+@app.route('/keepers', methods=['GET','POST'])
+def keepers():
+    league = league_cls.from_json(session['league'])
+
+    if request.method == 'POST':
+        user_selected = request.form['user_selected']
+        if 'keeper_team_id' not in session:
+            session['keeper_team_id'] = user_selected
+        elif 'keeper_player_rank' not in session:
+            session['keeper_player_rank'] = user_selected
+            player_obj = league.players[int(session['keeper_player_rank'])]
+            player_obj.team_id = session['keeper_team_id']
+            #TODO:
+            #request user to provide round
+            #figure out the pick # and then set it
+            player_obj.pick = 'keeper'
+            #set the player to manager's team
+
+        if request.form.get('confirmed','') == 'True':
+            return redirect(url_for('draft_player'))
+
+    return render_template('keepers.html', league=league)
+
 
 @app.route("/draft_player", methods=['GET','POST'])
 def draft_player():
@@ -60,31 +92,29 @@ def draft_player():
     league = league_cls.from_json(session['league'])
     if request.method == 'POST':
 
-        player_idx = request.form['button']
-        if player_idx == 'UNDO':
-            league.current_pick -= 1
+        undo = request.form.get('undo_button','')
+        if undo == 'UNDO':
 
-            #identify the last player selected
-            for team in league.teams:
-                for player_list in team.team_players.values():
-                    for player in player_list:
-                        if player.pick == str(league.current_pick):
+            #TODO: do not allow this to undo a keeper
+
+            rank = int(league.drafted.pop(-1))
+            player_obj = league.players[rank]
+
+            #mark player as unpicked (will now display in league pool)
+            player_obj.pick = ''
+            #remove the player from the manager's team
+            league.teams[player_obj.team_id].drop_player(rank)
                             
-                            #mark player as unpicked and put back in league pool
-                            player.pick = ''
-                            league.players[player.overall_rank] = player #obj of player_cls
-
-                            #remove the player from the manager's team
-                            player_list.remove(player)
-                            break
-
-
         else:
-            player_obj = league.players.pop(player_idx) #obj of player_cls
-            player_obj.pick = str(league.current_pick)
+            rank = int(request.form['select_by_rank'])
+            league.drafted.append(rank)
 
             team_id = league.pick_to_team()
             team = league.teams[team_id]
+
+            player_obj = league.players[rank] #obj of player_cls
+            player_obj.pick = str(len(league.drafted))
+            player_obj.team_id = team_id #handy for UNDO
 
             #1. attempt to assign as player's given position
             #2. attempt to assign to a flex position
@@ -109,13 +139,11 @@ def draft_player():
             else:
                 pos_key = 'BN'
 
-            league.teams[team_id].team_players[pos_key].append(player_obj)
-            league.current_pick += 1
+            league.teams[team_id].team_players[pos_key].append(rank)
 
         session['league'] = league.to_json()
 
-    sorted_ranks = sorted([ int(rank) for rank in league.players ])
-    return render_template('draft_player.html', league=league, sorted_ranks=sorted_ranks)
+    return render_template('draft_player.html', league=league)
 
     '''
     r = redis.StrictRedis(host='localhost', port=6379, db=0)

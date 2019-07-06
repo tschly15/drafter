@@ -11,7 +11,7 @@
     <div class="well">
         <div class="row">
 			<form action="" method="post" name="undo" class="form">
-				<button class="btn btn-primary" type="submit" value="UNDO" name="button">Undo</button>
+				<button class="btn btn-primary" type="submit" value="UNDO" name="undo_button">Undo</button>
 			</form>
 		</div>
         <div class="row">
@@ -30,7 +30,7 @@
                             <tr>
                                 <td>{{ pos }}</td>
                                 {% for team in league.teams|sort(attribute='team_id') %}
-                                    <td>{{ team.get_player(pos, idx) }}</td>
+                                    <td>{{ team.get_player(league, pos, idx) }}</td>
                                 {% endfor %}
                             </tr>
                         {% endfor %}
@@ -41,11 +41,12 @@
     </div>
 
     <form action="" method="post" name="home" class="form">
-        {% for rank in sorted_ranks %}
-            <button class="btn btn-primary" type="submit" value="{{ rank }}" name="button">
-                {{ league.players[rank|string].overall_rank }} {{ league.players[rank|string].tier }} {{ league.players[rank|string].position_rank }} {{ league.players[rank|string].player_name }} {{ league.players[rank|string].nfl_team }}
-            </button>
+        {% for rank in league.players %}
+			{% if not league.players[rank].pick %}
+				<button class="btn btn-primary" type="submit" value="{{ rank }}" name="select_by_rank">
+					{{ league.players[rank].overall_rank }} {{ league.players[rank].tier }} {{ league.players[rank].position_rank }} {{ league.players[rank].player_name }} {{ league.players[rank].nfl_team }}
+				</button>
+			{% endif %}
         {% endfor %}
     </form>
 {% endblock %}
-

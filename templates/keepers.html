@@ -1,0 +1,26 @@
+<html>
+<title>Test</title>
+<h1>Index2</h1>
+
+<form method="post">
+	{% if 'keeper_team_id' not in session %}
+		<p>Select the team</p>
+		{% for team in league.teams %}
+			<button type="submit" class="btn btn-primary" name="user_selected" value="{{ team.team_id }}">{{ team.team_name }}</button>
+		{% endfor %}
+
+	{% else %}
+		{% if 'keeper_player_rank' not in session %}
+			<p>Select the player</p>
+			{% for rank in league.players %}
+				{% if not league.players[rank].pick %}
+					<button class="btn btn-primary" type="submit" value="{{ rank }}" name="user_selected">
+						{{ league.players[rank].overall_rank }} {{ league.players[rank].tier }} {{ league.players[rank].position_rank }} {{ league.players[rank].player_name }} {{ league.players[rank].nfl_team }}
+					</button>
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+	{% endif %}
+</form>
+
+</html>

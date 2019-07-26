@@ -25,10 +25,12 @@ class league_cls(object):
             self.__dict__.update(reinit)
 
         else:
-            #initial value is accurate, then session['num_teams'] is lost
             self.num_teams = session.pop('num_teams')
             self.rounds = session.pop('num_rounds')
-            self.keepers = session.pop('include_keepers')
+
+            #a list of ranks (ie. pointers to player objs)
+            self.keepers = []
+            self.include_keepers = session.pop('include_keepers')
 
             #TODO: define the full path
             self.cache = 'response.cache'
@@ -67,6 +69,18 @@ class league_cls(object):
         mod = pos % num_teams
         return num_teams - mod if mod else 0
 
+    def pick_from_team(self, session):
+        num_teams = int(self.num_teams)
+        rnd = int(session['keeper_player_round'])
+        team_id = int(session['keeper_team_id']) + 1
+
+        pick_before_round = (rnd-1) * num_teams 
+        if rnd % 2:
+            return pick_before_round + team_id
+
+        inv_team_id = (num_teams+1) - team_id
+        return pick_before_round + inv_team_id
+
     def define_positions(self, session):
         positions = []
         for fld in list(session):
@@ -99,9 +113,9 @@ class league_cls(object):
 
                 self.players[player_obj.overall_rank] = player_obj
 
-            if len(self.players) >= 15:
+            if len(self.players) > 15:
                 break
-            
+
 
     def __str__(self):
         return json.dumps(self.__dict__, indent=2, cls=custom_encoder)
@@ -126,6 +140,19 @@ class league_cls(object):
 
         return soup
 
+    def draft_player_with_rank(self, session, rank):
+            self.drafted.append(rank)
+
+            team_id = self.pick_to_team()
+            team = self.teams[team_id]
+
+            player_obj = self.players[rank] #obj of player_cls
+            player_obj.pick = str(len(self.drafted))
+            player_obj.team_id = team_id #handy for UNDO
+
+            position = team.determine_position(session, player_obj)
+            self.teams[team_id].team_players[position].append(rank)
+
 
 class team_cls(object):
     def __init__(self, tid=None, name="", reinit=None):
@@ -148,6 +175,31 @@ class team_cls(object):
             return league.players[rank].player_name
         except (KeyError,IndexError):
             return '-'
+
+    def determine_position(self, session, player_obj):
+        #1. attempt to assign as player's given position
+        #2. attempt to assign to a flex position
+        #3. attempt to assign to the bench
+
+        pos = player_obj.position
+        applicable_positions = [ fld
+                                 for fld in session
+                                 if fld.count(pos)
+                                    and int(session[fld][1]) > 0 ]
+
+        #move to the front of the line
+        key = 'settings_num_{0}'.format(pos)
+        if key in applicable_positions:
+            applicable_positions.remove(key)
+            applicable_positions.insert(0, key)
+
+        for position in applicable_positions:
+            pos_key = position.rsplit('_',1)[1].upper()
+            if len(self.team_players[pos_key]) < int(session[position][1]):
+                return pos_key
+
+        #TODO: remove placeholder, finish logic
+        return 'BN'
 
     def __str__(self):
         return json.dumps(self.__dict__, indent=2, cls=custom_encoder)
@@ -180,7 +232,7 @@ def deserialize(o):
     #TODO: either a mixin or method with identical signature for each class
     if '__league_cls__' in o:
         dct = o['__league_cls__']
-        for key in dct['players']:
+        for key in list(dct['players']):
             player_obj = dct['players'].pop(key)
             dct['players'][int(key)] = player_obj
         return league_cls(reinit=dct)

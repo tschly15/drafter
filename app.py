@@ -52,7 +52,7 @@ def confirm():
             league = league_cls(session=session)
             session['league'] = league.to_json()
 
-            if league.keepers == 'Y':
+            if league.include_keepers == 'Y':
                 return redirect(url_for('keepers'))
 
             return redirect(url_for('draft_player'))
@@ -67,18 +67,39 @@ def keepers():
     league = league_cls.from_json(session['league'])
 
     if request.method == 'POST':
+
+        if request.form.get('confirmed','') == 'True':
+            return redirect(url_for('draft_player'))
+
         user_selected = request.form['user_selected']
+
         if 'keeper_team_id' not in session:
             session['keeper_team_id'] = user_selected
-        elif 'keeper_player_rank' not in session:
-            session['keeper_player_rank'] = user_selected
-            player_obj = league.players[int(session['keeper_player_rank'])]
-            player_obj.team_id = session['keeper_team_id']
-            #TODO:
+
+        elif 'keeper_player_round' not in session:
             #request user to provide round
-            #figure out the pick # and then set it
-            player_obj.pick = 'keeper'
-            #set the player to manager's team
+            session['keeper_player_round'] = user_selected
+
+        elif 'keeper_player_rank' not in session:
+            rank = int(user_selected)
+            team_id = int(session['keeper_team_id'])
+
+            player_obj = league.players[rank]
+            player_obj.pick = league.pick_from_team(session)
+            player_obj.team_id = team_id #set the player to manager's team
+            player_obj.keeper_round = session['keeper_player_round']
+
+            team = league.teams[team_id]
+            position = team.determine_position(session, player_obj)
+            team.team_players[position].append(rank)
+
+            league.keepers.append(rank)
+
+            for key in list(session):
+                if key.startswith('keeper_'):
+                    del session[key]
+
+            session['league'] = league.to_json()
 
         if request.form.get('confirmed','') == 'True':
             return redirect(url_for('draft_player'))
@@ -96,7 +117,6 @@ def draft_player():
         if undo == 'UNDO':
 
             #TODO: do not allow this to undo a keeper
-
             rank = int(league.drafted.pop(-1))
             player_obj = league.players[rank]
 
@@ -107,57 +127,15 @@ def draft_player():
                             
         else:
             rank = int(request.form['select_by_rank'])
-            league.drafted.append(rank)
+            league.draft_player_with_rank(session, rank)
 
-            team_id = league.pick_to_team()
-            team = league.teams[team_id]
-
-            player_obj = league.players[rank] #obj of player_cls
-            player_obj.pick = str(len(league.drafted))
-            player_obj.team_id = team_id #handy for UNDO
-
-            #1. attempt to assign as player's given position
-            #2. attempt to assign to a flex position
-            #3. attempt to assign to the bench
-
-            pos = player_obj.position
-            applicable_positions = [ fld
-                                     for fld in session
-                                     if fld.count(pos)
-                                        and int(session[fld][1]) > 0 ]
-
-            #move to the front of the line
-            key = 'settings_num_{0}'.format(pos)
-            if key in applicable_positions:
-                applicable_positions.remove(key)
-                applicable_positions.insert(0, key)
-
-            for position in applicable_positions:
-                pos_key = position.rsplit('_',1)[1].upper()
-                if len(team.team_players[pos_key]) < int(session[position][1]):
-                    break
-            else:
-                pos_key = 'BN'
-
-            league.teams[team_id].team_players[pos_key].append(rank)
+            potential_keeper_pick = len(league.drafted) + 1 
+            if potential_keeper_pick in league.keepers:
+                league.drafted.append(potential_keeper_pick)
 
         session['league'] = league.to_json()
 
     return render_template('draft_player.html', league=league)
 
-    '''
-    r = redis.StrictRedis(host='localhost', port=6379, db=0)
-
-    images= [
-        {'type':'big', 'url':'....'},
-        {'type':'big', 'url':'....'},
-        {'type':'big', 'url':'....'},
-    ]
-
-    json_images = json.dumps(images)
-    r.set('images', json_images)
-    unpacked_images = json.loads(r.get('images'))
-    images == unpacked_images
-    '''
 
 app.run(debug=True, port=5001)

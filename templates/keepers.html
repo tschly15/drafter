@@ -10,17 +10,39 @@
 		{% endfor %}
 
 	{% else %}
-		{% if 'keeper_player_rank' not in session %}
-			<p>Select the player</p>
-			{% for rank in league.players %}
-				{% if not league.players[rank].pick %}
-					<button class="btn btn-primary" type="submit" value="{{ rank }}" name="user_selected">
-						{{ league.players[rank].overall_rank }} {{ league.players[rank].tier }} {{ league.players[rank].position_rank }} {{ league.players[rank].player_name }} {{ league.players[rank].nfl_team }}
-					</button>
-				{% endif %}
+		{% if 'keeper_player_round' not in session %}
+			<p>Select the round</p>
+			{% for rnd in range(1, league.rounds|int+1) %}
+				<button type="submit" class="btn btn-primary" name="user_selected" value="{{ rnd }}">{{ rnd|string }}</button>
 			{% endfor %}
+
+		{% else %}
+
+			{% if 'keeper_player_rank' not in session %}
+				<p>Select the player</p>
+				{% for rank in league.players %}
+					{% if not league.players[rank].pick %}
+						<button class="btn btn-primary" type="submit" value="{{ rank }}" name="user_selected">
+							{{ league.players[rank].overall_rank }} {{ league.players[rank].tier }} {{ league.players[rank].position_rank }} {{ league.players[rank].player_name }} {{ league.players[rank].nfl_team }}
+						</button>
+					{% endif %}
+				{% endfor %}
+			{% endif %}
+
 		{% endif %}
 	{% endif %}
+</form>
+
+<p>Keepers:</p>
+{% for rank in league.keepers %}
+	<p>
+		{{ league.players[rank].team_id }} {{ league.players[rank].player_name }} {{ league.players[rank].keeper_round }} 
+	</p>
+{% endfor %}
+
+<form method="post" name="my_form_button">
+	<button type="submit" class="btn btn-primary" name="confirmed" value="True">Confirm</button>
+	<button type="submit" class="btn btn-danger" name="start_over" value="True">Start Over</button>
 </form>
 
 </html>

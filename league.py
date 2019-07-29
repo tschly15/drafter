@@ -113,9 +113,6 @@ class league_cls(object):
 
                 self.players[player_obj.overall_rank] = player_obj
 
-            if len(self.players) > 15:
-                break
-
 
     def __str__(self):
         return json.dumps(self.__dict__, indent=2, cls=custom_encoder)

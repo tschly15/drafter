@@ -116,22 +116,27 @@ def draft_player():
         undo = request.form.get('undo_button','')
         if undo == 'UNDO':
 
-            #TODO: do not allow this to undo a keeper
             rank = int(league.drafted.pop(-1))
-            player_obj = league.players[rank]
 
-            #mark player as unpicked (will now display in league pool)
-            player_obj.pick = ''
-            #remove the player from the manager's team
-            league.teams[player_obj.team_id].drop_player(rank)
+            #do not allow this to undo a keeper
+            if rank not in league.keepers:
+                #mark player as unpicked (will now display in league pool)
+                player_obj = league.players[rank]
+                player_obj.pick = ''
+                #remove the player from the manager's team
+                league.teams[player_obj.team_id].drop_player(rank)
+
+            #handle consecutive sleepers
+            while league.drafted and int(league.drafted[-1]) in league.keepers:
+                league.drafted.pop(-1)
                             
         else:
             rank = int(request.form['select_by_rank'])
             league.draft_player_with_rank(session, rank)
 
-            potential_keeper_pick = len(league.drafted) + 1 
-            if potential_keeper_pick in league.keepers:
-                league.drafted.append(potential_keeper_pick)
+            #potential keeper pick 
+            while len(league.drafted) + 1 in league.keepers:
+                league.drafted.append(len(league.drafted) + 1)
 
         session['league'] = league.to_json()
 

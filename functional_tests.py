@@ -11,8 +11,8 @@ class draftTest(unittest.TestCase):
     def test_if_this_is_the_draft_app(self):
         '''home page identifies itself as a draft app'''
 
-        self.browser.get('http://localhost:5000')
-        assert 'DRAFT' in self.browser.title.upper()
+        self.browser.get('http://localhost:5001')
+        assert 'TEST' in self.browser.title.upper()
 
     def test_if_team_selection_buttons_are_present(self):
         '''
@@ -20,8 +20,8 @@ class draftTest(unittest.TestCase):
          who's value corresponds to the number of teams in the draft
         '''
 
-        self.browser.get('http://localhost:5000')
-        assert len(self.browser.find_elements_by_xpath('//button')) > 0
+        self.browser.get('http://localhost:5001')
+        assert len(self.browser.find_elements_by_xpath('//label')) == 12
 
 
 if __name__ == '__main__':

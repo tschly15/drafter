@@ -6,7 +6,6 @@ nt = namedtuple('form_data', 'label default choices')
 league_fields = {
     'include_keepers': nt('Keepers', 'Y', [('Y','Yes'), ('N','No')]),
     'num_teams': nt('Teams', 6, [ (x,x) for x in range(6,15,2) ]),
-    'num_rounds': nt('Rounds', 6, [ (x,x) for x in range(1,21) ]),
     'num_K': nt('Kickers', 0, [ (x,x) for x in range(0,3) ]),
     'num_QB': nt('Quarterbacks', 1, [ (x,x) for x in range(0,3) ]),
     'num_RB': nt('Running Backs', 1, [ (x,x) for x in range(0,3) ]),

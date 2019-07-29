@@ -26,7 +26,6 @@ class league_cls(object):
 
         else:
             self.num_teams = session.pop('num_teams')
-            self.rounds = session.pop('num_rounds')
 
             #a list of ranks (ie. pointers to player objs)
             self.keepers = []
@@ -46,6 +45,7 @@ class league_cls(object):
             #link to player objs in order they were drafted
             self.drafted = [] 
             self.positions = self.define_positions(session)
+            self.rounds = len(self.positions)
 
     def to_json(self):
         key = '__{0}__'.format(self.__class__.__name__)

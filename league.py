@@ -28,7 +28,7 @@ class league_cls(object):
             self.num_teams = session.pop('num_teams')
 
             #a list of ranks (ie. pointers to player objs)
-            self.keepers = []
+            self.keepers = {}
             self.include_keepers = session.pop('include_keepers')
 
             #TODO: define the full path
@@ -47,6 +47,13 @@ class league_cls(object):
             self.positions = self.define_positions(session)
             self.rounds = len(self.positions)
 
+    @property
+    def current_pick(self):
+        return len(self.drafted)
+    @property
+    def current_round(self):
+        return int((self.current_pick-1) / int(self.num_teams)) + 1
+
     def to_json(self):
         key = '__{0}__'.format(self.__class__.__name__)
         val = json.dumps(self.__dict__, cls=custom_encoder)
@@ -57,28 +64,22 @@ class league_cls(object):
         return json.loads(serialized, object_hook=deserialize)
 
     def pick_to_team(self):
-        current_pick = len(self.drafted)
-        num_teams = int(self.num_teams)
-
-        pos = current_pick % num_teams
-        rnd = int((current_pick-1) / num_teams) + 1
-
-        if rnd % 2:
-            return pos-1 if pos else num_teams-1
+        pos = self.current_pick % int(self.num_teams)
+        if self.current_round % 2:
+            return pos-1 if pos else int(self.num_teams)-1
         
-        mod = pos % num_teams
-        return num_teams - mod if mod else 0
+        mod = pos % int(self.num_teams)
+        return int(self.num_teams) - mod if mod else 0
 
     def pick_from_team(self, session):
-        num_teams = int(self.num_teams)
         rnd = int(session['keeper_player_round'])
         team_id = int(session['keeper_team_id']) + 1
 
-        pick_before_round = (rnd-1) * num_teams 
+        pick_before_round = (rnd-1) * int(self.num_teams)
         if rnd % 2:
             return pick_before_round + team_id
 
-        inv_team_id = (num_teams+1) - team_id
+        inv_team_id = int(self.num_teams) + 1 - team_id
         return pick_before_round + inv_team_id
 
     def define_positions(self, session):
@@ -112,6 +113,9 @@ class league_cls(object):
                 player_obj = player_cls(cell=cell, tier=tier)
 
                 self.players[player_obj.overall_rank] = player_obj
+
+            #if len(self.players) > 9:
+            #    break
 
 
     def __str__(self):

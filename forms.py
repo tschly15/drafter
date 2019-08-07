@@ -15,7 +15,7 @@ league_fields = {
     'num_WR/RB/TE': nt('Flex: W/R/T', 1, [ (x,x) for x in range(0,3) ]),
     'num_WR/RB/TE/QB': nt('SuperFlex: W/R/T/QB', 0, [ (x,x) for x in range(0,3) ]),
     'num_DST': nt('Defenses', 1, [ (x,x) for x in range(0,3) ]),
-    'num_BN': nt('Bench', 6, [ (x,x) for x in range(0,11) ]),
+    'num_BN': nt('Bench', 2, [ (x,x) for x in range(0,11) ]),
 }
 class LeagueForm(Form):
     for fld, form_nt in league_fields.items(): ###

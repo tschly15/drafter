@@ -1,7 +1,7 @@
-#!Scripts/python
-###!bin/python
+#!/usr/bin/env python
+
 import json
-import redis
+from redis import Redis
 from league import league_cls
 from flask_session import Session
 from flask_bootstrap import Bootstrap
@@ -11,8 +11,8 @@ from flask import Flask, request, redirect, url_for, session, render_template
 # setup flask
 app = Flask(__name__)
 app.config.update(
-    DEBUG = True,
     SESSION_TYPE = 'redis',
+    SESSION_REDIS = Redis(host='redis', port=6379),
     SECRET_KEY = 'f4ea57d983e77f074fb9209c425b238b56bdcc8c92d32c4f',
     SESSION_PERMANENT = False,
 )
@@ -148,4 +148,4 @@ def draft_player():
     return render_template('draft_player.html', league=league)
 
 
-app.run(debug=True, port=5001)
+app.run(port=5000, host='0.0.0.0')

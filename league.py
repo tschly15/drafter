@@ -92,7 +92,7 @@ class league_cls(object):
         return positions
 
     def identify_players(self):
-        soup = self.get_html(refresh=False)
+        soup = self.get_html()
 
         base_div = soup.find('div', attrs={'id':'rankings-table-wrapper'})
         base_body = base_div.find('table').find('tbody')
@@ -114,9 +114,6 @@ class league_cls(object):
 
                 self.players[player_obj.overall_rank] = player_obj
 
-            #if len(self.players) > 9:
-            #    break
-
 
     def __str__(self):
         return json.dumps(self.__dict__, indent=2, cls=custom_encoder)
@@ -130,8 +127,8 @@ class league_cls(object):
             except AttributeError:
                 soup = b4(response.text)
 
-            with open(self.cache,'w') as f:
-                f.write(response.text.encode('utf8'))
+            #with open(self.cache,'w') as f:
+            #   f.write(response.text.encode('utf8'))
 
         else: #this is merely to aid in testing
             try:

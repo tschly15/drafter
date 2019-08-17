@@ -1,12 +1,43 @@
-<html>
-<title>Test</title>
-<h1>Index</h1>
-<form method=post>
-	{% for v in form._fields.values() %}
-	<dl>
-		{{ v.label }} {{ v }}
-	</dl>
-	{% endfor %}
-	<p><input type=submit value=Register></p>
-</form>
-</html>
+{% extends 'helper.html' %}
+
+{% block head %}
+	<title>League Title</title>
+	<h1>League Header</h1>
+{% endblock %}
+
+{% block content %}
+	<form method="post">
+		<div class="well">
+			<table class="table table-borderless">
+				<tbody>
+					<tr>
+						<td scope="col">Number of Teams:</td>
+						<td margin-top="10pt">
+							<dl>{{ form._fields['num_teams'] }}</dl>
+						</td>
+						<td scope="col">Allow Keepers:</td>
+						<td>
+							<dl>{{ form._fields['include_keepers'] }}</dl>
+						</td>
+					</tr>
+
+					<tr>
+						<td>Positions:</td>
+					</tr>
+
+					{% for v in form._fields.values() %}
+						{% if v.label not in ('Teams','Keepers') %}
+							<tr>
+								<td>{{ v.label }}:</td>
+								<td><dl>{{ v }}</dl></td>
+							</tr>
+						{% endif %}
+					{% endfor %}
+
+				</tbody>
+			</table>
+			
+			<p><input type=submit value=Register></p>
+		</div>
+	</form>
+{% endblock %}

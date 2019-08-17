@@ -1,10 +1,8 @@
-{% extends "bootstrap/base.html" %}
-{% block title %}Title for base.html{% endblock %}
+{% extends 'helper.html' %}
 
-{% block navbar %}
-<div class="navbar navbar-fixed-top">
-    <p>Inside</p>
-</div>
+{% block head %}
+	<title>Draft Title</title>
+	<h1>Draft Header</h1>
 {% endblock %}
 
 {% block content %}
@@ -41,12 +39,17 @@
     </div>
 
     <form action="" method="post" name="home" class="form">
-        {% for rank in league.players %}
-			{% if not league.players[rank].pick %}
-				<button class="btn btn-primary" type="submit" value="{{ rank }}" name="select_by_rank">
-					{{ league.players[rank].overall_rank }} {{ league.players[rank].tier }} {{ league.players[rank].position_rank }} {{ league.players[rank].player_name }} {{ league.players[rank].nfl_team }}
-				</button>
-			{% endif %}
-        {% endfor %}
+		<div class="col-sm">
+			<table class="table">
+				{% for rank, player_obj in league.players.items() %}
+					{% if not player_obj.pick and player_obj.position == 'QB' %}
+						<button class="badge badge-pill badge-primary" type="submit" value="{{ rank }}" name="select_by_rank">
+							{{ player_obj.overall_rank }} {{ player_obj.position_rank }} {{ player_obj.player_name }} {{ player_obj.nfl_team }}
+						</button>
+					{% endif %}
+				{% endfor %}
+			</table>
+		</div>
     </form>
 {% endblock %}
+

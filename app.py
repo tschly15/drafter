@@ -12,7 +12,7 @@ from flask import Flask, request, redirect, url_for, session, render_template
 app = Flask(__name__)
 app.config.update(
     SESSION_TYPE = 'redis',
-    SESSION_REDIS = Redis(host='redis', port=6379),
+#   SESSION_REDIS = Redis(host='redis', port=6379),
     SECRET_KEY = 'f4ea57d983e77f074fb9209c425b238b56bdcc8c92d32c4f',
     SESSION_PERMANENT = False,
 )
@@ -148,4 +148,4 @@ def draft_player():
     return render_template('draft_player.html', league=league)
 
 
-app.run(port=5000, host='0.0.0.0')
+app.run(port=5001, host='0.0.0.0')

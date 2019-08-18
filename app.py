@@ -66,43 +66,45 @@ def confirm():
 def keepers():
     league = league_cls.from_json(session['league'])
 
-    if request.method == 'POST':
+    if request.method == 'GET' or request.form.get('start_over','') == 'True':
+        return render_template('keepers.html', league=league)
+    elif request.form.get('confirmed','') == 'True':
+        return redirect(url_for('draft_player'))
+    elif request.form.get('start_over','') == 'True':
+        return redirect(url_for('home'))
 
-        if request.form.get('confirmed','') == 'True':
-            return redirect(url_for('draft_player'))
+    user_selected = request.form['user_selected']
 
-        user_selected = request.form['user_selected']
+    if 'keeper_team_id' not in session:
+        session['keeper_team_id'] = user_selected
 
-        if 'keeper_team_id' not in session:
-            session['keeper_team_id'] = user_selected
+    elif 'keeper_player_round' not in session:
+        #request user to provide round
+        session['keeper_player_round'] = user_selected
 
-        elif 'keeper_player_round' not in session:
-            #request user to provide round
-            session['keeper_player_round'] = user_selected
+    elif 'keeper_player_rank' not in session:
+        rank = int(user_selected)
+        team_id = int(session['keeper_team_id'])
 
-        elif 'keeper_player_rank' not in session:
-            rank = int(user_selected)
-            team_id = int(session['keeper_team_id'])
+        player_obj = league.players[rank]
+        player_obj.pick = league.pick_from_team(session)
+        player_obj.team_id = team_id #set the player to manager's team
+        player_obj.keeper_round = session['keeper_player_round']
 
-            player_obj = league.players[rank]
-            player_obj.pick = league.pick_from_team(session)
-            player_obj.team_id = team_id #set the player to manager's team
-            player_obj.keeper_round = session['keeper_player_round']
+        team = league.teams[team_id]
+        position = team.determine_position(session, player_obj)
+        team.team_players[position].append(rank)
 
-            team = league.teams[team_id]
-            position = team.determine_position(session, player_obj)
-            team.team_players[position].append(rank)
+        league.keepers[player_obj.pick] = rank
 
-            league.keepers[player_obj.pick] = rank
+        for key in list(session):
+            if key.startswith('keeper_'):
+                del session[key]
 
-            for key in list(session):
-                if key.startswith('keeper_'):
-                    del session[key]
+        session['league'] = league.to_json()
 
-            session['league'] = league.to_json()
-
-        if request.form.get('confirmed','') == 'True':
-            return redirect(url_for('draft_player'))
+    if request.form.get('confirmed','') == 'True':
+        return redirect(url_for('draft_player'))
 
     return render_template('keepers.html', league=league)
 
@@ -148,4 +150,4 @@ def draft_player():
     return render_template('draft_player.html', league=league)
 
 
-app.run(port=5001, host='0.0.0.0')
+app.run(port=5001, host='0.0.0.0', debug=True)

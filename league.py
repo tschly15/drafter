@@ -114,6 +114,8 @@ class league_cls(object):
 
                 self.players[player_obj.overall_rank] = player_obj
 
+            #if len(self.players) == 15:
+            #    break
 
     def __str__(self):
         return json.dumps(self.__dict__, indent=2, cls=custom_encoder)
@@ -139,25 +141,31 @@ class league_cls(object):
         return soup
 
     def draft_player_with_rank(self, session, rank):
+            '''
+            update league.drafted with rank of drafted player
+            tell player what number they were selected
+            tell player which team it belongs to
+            tell team of player's position
+            '''
             self.drafted.append(rank)
 
             team_id = self.pick_to_team()
-            team = self.teams[team_id]
+            team_obj = self.teams[team_id] #obj of team_cls
 
             player_obj = self.players[rank] #obj of player_cls
-            player_obj.pick = str(len(self.drafted))
             player_obj.team_id = team_id #handy for UNDO
+            player_obj.pick = len(self.drafted)
 
-            position = team.determine_position(session, player_obj)
-            self.teams[team_id].team_players[position].append(rank)
+            position = team_obj.determine_position(session, player_obj)
+            team_obj.team_players[position].append(rank)
 
 
 class team_cls(object):
-    def __init__(self, tid=None, name="", reinit=None):
+    def __init__(self, tid=-1, name="", reinit=None):
         if reinit:
             self.__dict__.update(reinit)
         else:
-            self.team_id = str(tid)
+            self.team_id = tid
             self.team_name = name or "Team{0}".format(int(tid+1))
             self.team_players = defaultdict(list)
 
@@ -219,8 +227,8 @@ class player_cls(object):
             self.player_name = str(cell[2].find('a').find('span', attrs={'class':'full-name'}).text)
 
             self.tier = tier
-            self.pick = None
-            self.team_id = None
+            self.pick = -1
+            self.team_id = -1
 
     def __str__(self):
         return json.dumps(self.__dict__, indent=2, cls=custom_encoder)
@@ -239,6 +247,7 @@ def deserialize(o):
         dct['team_players'] = defaultdict(list, dct.pop('team_players'))
         return team_cls(reinit=dct)
     elif '__player_cls__' in o:
+        #want as int: overall_rank, pick, team_id
         dct = o['__player_cls__']
         return player_cls(reinit=dct)
 

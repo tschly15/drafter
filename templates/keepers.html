@@ -21,7 +21,7 @@
 			{% if 'keeper_player_rank' not in session %}
 				<p>Select the player</p>
 				{% for rank in league.players %}
-					{% if not league.players[rank].pick %}
+                    {% if league.players[rank].pick|int > 1 %}
 						<button class="btn btn-primary" type="submit" value="{{ rank }}" name="user_selected">
 							{{ league.players[rank].overall_rank }} {{ league.players[rank].tier }} {{ league.players[rank].position_rank }} {{ league.players[rank].player_name }} {{ league.players[rank].nfl_team }}
 						</button>

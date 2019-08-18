@@ -123,7 +123,7 @@ def draft_player():
             if rank not in league.keepers.values():
                 #mark player as unpicked (will now display in league pool)
                 player_obj = league.players[rank]
-                player_obj.pick = ''
+                player_obj.pick = -1
                 #remove the player from the manager's team
                 league.teams[player_obj.team_id].drop_player(rank)
 
@@ -133,6 +133,7 @@ def draft_player():
                             
         else:
             #TODO: sort out str vs int issue for league.keepers
+            # would like rank and team_id to remain an int
             rank = int(request.form['select_by_rank'])
             league.draft_player_with_rank(session, rank)
 

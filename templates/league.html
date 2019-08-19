@@ -1,13 +1,8 @@
-{% extends 'helper.html' %}
-
-{% block head %}
-	<title>League Title</title>
-	<h1>League Header</h1>
-{% endblock %}
+{% extends 'base.html' %}
 
 {% block content %}
+	<div class="container">
 	<form method="post">
-		<div class="well">
 			<table class="table table-borderless">
 				<tbody>
 					<tr>
@@ -40,4 +35,5 @@
 			<p><input type=submit value=Register></p>
 		</div>
 	</form>
+	</div>
 {% endblock %}

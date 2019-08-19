@@ -1,12 +1,7 @@
-{% extends 'helper.html' %}
-
-{% block head %}
-	<title>Draft Title</title>
-	<h1>Draft Header</h1>
-{% endblock %}
+{% extends 'base.html' %}
 
 {% block content %}
-    <div class="well">
+    <div class="container">
         <div class="row">
 		<form action="" method="post" name="undo" class="form">
 			<button class="btn btn-primary" type="submit" value="UNDO" name="undo_button">Undo</button>
@@ -38,9 +33,10 @@
         </div>
     </div>
 
-    <form action="" method="post" name="home" class="form">
 	<div class="container">
-		<div class="row">
+    <div class="well">
+	<div class="row">
+	    <form action="" method="post" name="home" class="form">
 
 			<div class="col-2">
 				{% for rank, player_obj in league.players.items() %}
@@ -89,9 +85,10 @@
 					{% endif %}
 				{% endfor %}
 			</div>
+		    </form>
 		</div>
 	</div>
+    </div>
 
-    </form>
 {% endblock %}
 

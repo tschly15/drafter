@@ -1,18 +1,15 @@
-{% extends 'helper.html' %}
-
-{% block head %}
-	<title>Confirm Title</title>
-	<h1>Confirm Header</h1>
-{% endblock %}
+{% extends 'base.html' %}
 
 {% block content %}
-	{% for key in session %}
-		{% if key.startswith('settings_') %}
-			<p>
-				{{ session[key][0] }} {{ session[key][1] }}
-			</p>
-		{% endif %}
-	{% endfor %}
+	<div class="container">
+		{% for key in session %}
+			{% if key.startswith('settings_') %}
+				<p>
+					{{ session[key][0] }} {{ session[key][1] }}
+				</p>
+			{% endif %}
+		{% endfor %}
+	</div>
 
 	<form method="post" name="my_form_button">
 		<button type="submit" class="btn btn-primary" name="confirmed" value="True">Confirm</button>

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% import 'macros.jinja' as macros %}
 
 {% block app_content %}
 	<div class="container">
@@ -17,13 +18,23 @@
 
 		{% elif 'keeper_player_rank' not in session %}
 			<p>Select the player</p>
-			{% for rank, player_obj in league.players.items() %}
-				{% if player_obj.pick|int < 1 %}
-					<button class="btn btn-primary" type="submit" value="{{ rank }}" name="user_selected">
-						{{ player_obj.overall_rank }} {{ player_obj.position_rank }} {{ player_obj.player_name }} {{ player_obj.nfl_team }}
-					</button>
-				{% endif %}
-			{% endfor %}
+			<div class="row">
+				<div class="col-md-2">
+					{{ macros.display_position(league, "QB", "user_selected") }}
+				</div>
+				<div class="col-md-3">
+					{{ macros.display_position(league, "RB", "user_selected") }}
+				</div>
+				<div class="col-md-3">
+					{{ macros.display_position(league, "WR", "user_selected") }}
+				</div>
+				<div class="col-md-2">
+					{{ macros.display_position(league, "TE", "user_selected") }}
+				</div>
+				<div class="col-md-2">
+					{{ macros.display_position(league, "DST", "user_selected") }}
+				</div>
+			</div>
 		{% endif %}
 	</form>
 	
@@ -31,7 +42,7 @@
 	<p>Keepers:</p>
 	{% for rank in league.keepers.values() %}
 		<p>
-			Round: {{ league.players[rank].keeper_round }}, Team ID: {{ league.players[rank].team_id|int + 1 }}, Player: {{ league.players[rank].player_name }}
+			Player: {{ league.players[rank].player_name }}, Round: {{ league.players[rank].keeper_round }}, Team ID: {{ league.players[rank].team_id|int + 1 }}
 		</p>
 	{% endfor %}
 

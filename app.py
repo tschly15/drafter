@@ -15,6 +15,7 @@ app.config.update(
 #   SESSION_REDIS = Redis(host='redis', port=6379),
     SECRET_KEY = 'f4ea57d983e77f074fb9209c425b238b56bdcc8c92d32c4f',
     SESSION_PERMANENT = False,
+    EXPLAIN_TEMPLATE_LOADING = True,
 )
 
 Bootstrap(app)

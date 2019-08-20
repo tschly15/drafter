@@ -9,7 +9,7 @@
 	</div>
         <div class="row">
             <div class="col-sm">
-                <table class="table">
+                <table class="table table-striped table-sm">
                     <thead>
                         <tr>
                             <th>b</th>
@@ -38,7 +38,7 @@
 	<div class="row">
 	    <form action="" method="post" name="home" class="form">
 
-			<div class="col-2">
+			<div class="col-md-2">
 				{% for rank, player_obj in league.players.items() %}
 					{% if player_obj.pick|int < 1 and player_obj.position == 'QB' %}
 						<button class="badge badge-pill badge-primary" type="submit" value="{{ rank }}" name="select_by_rank">
@@ -48,38 +48,38 @@
 				{% endfor %}
 			</div>
 			
-			<div class="col-3">
+			<div class="col-md-3">
 				{% for rank, player_obj in league.players.items() %}
 					{% if player_obj.pick|int < 1 and player_obj.position == 'RB' %}
-						<button class="badge badge-pill badge-primary" type="submit" value="{{ rank }}" name="select_by_rank">
+						<button class="badge badge-pill badge-secondary" type="submit" value="{{ rank }}" name="select_by_rank">
 							{{ player_obj.overall_rank }} {{ player_obj.position_rank }} {{ player_obj.player_name }} {{ player_obj.nfl_team }}
 						</button>
 					{% endif %}
 				{% endfor %}
 			</div>
 
-			<div class="col-3">
+			<div class="col-md-3">
 				{% for rank, player_obj in league.players.items() %}
 					{% if player_obj.pick|int < 1 and player_obj.position == 'WR' %}
-						<button class="badge badge-pill badge-primary" type="submit" value="{{ rank }}" name="select_by_rank">
+						<button class="badge badge-pill badge-danger" type="submit" value="{{ rank }}" name="select_by_rank">
 							{{ player_obj.overall_rank }} {{ player_obj.position_rank }} {{ player_obj.player_name }} {{ player_obj.nfl_team }}
 						</button>
 					{% endif %}
 				{% endfor %}
 			</div>
-			<div class="col-2">
+			<div class="col-md-2">
 				{% for rank, player_obj in league.players.items() %}
 					{% if player_obj.pick|int < 1 and player_obj.position == 'TE' %}
-						<button class="badge badge-pill badge-primary" type="submit" value="{{ rank }}" name="select_by_rank">
+						<button class="badge badge-pill badge-success" type="submit" value="{{ rank }}" name="select_by_rank">
 							{{ player_obj.overall_rank }} {{ player_obj.position_rank }} {{ player_obj.player_name }} {{ player_obj.nfl_team }}
 						</button>
 					{% endif %}
 				{% endfor %}
 			</div>
-			<div class="col-2">
+			<div class="col-md-2">
 				{% for rank, player_obj in league.players.items() %}
 					{% if player_obj.pick|int < 1 and player_obj.position == 'DST' %}
-						<button class="badge badge-pill badge-primary" type="submit" value="{{ rank }}" name="select_by_rank">
+						<button class="badge badge-pill badge-info" type="submit" value="{{ rank }}" name="select_by_rank">
 							{{ player_obj.overall_rank }} {{ player_obj.position_rank }} {{ player_obj.player_name }} {{ player_obj.nfl_team }}
 						</button>
 					{% endif %}

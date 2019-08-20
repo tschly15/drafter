@@ -2,13 +2,15 @@
 
 {% block content %}
 	<div class="container">
+		<ul class="list-group">
 		{% for key in session %}
 			{% if key.startswith('settings_') %}
-				<p>
+				<li class="list-group-item">
 					{{ session[key][0] }} {{ session[key][1] }}
-				</p>
+				</li>
 			{% endif %}
 		{% endfor %}
+		</ul>
 	</div>
 
 	<form method="post" name="my_form_button">

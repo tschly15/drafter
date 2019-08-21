@@ -20,8 +20,8 @@
 						<td>Positions:</td>
 					</tr>
 
-					{% for v in form._fields.values() %}
-						{% if v.label not in ('Teams','Keepers') %}
+					{% for k, v in form._fields.iteritems() %}
+						{% if k not in ('num_teams','include_keepers') %}
 							<tr>
 								<td>{{ v.label }}:</td>
 								<td><dl>{{ v }}</dl></td>

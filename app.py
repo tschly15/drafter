@@ -15,7 +15,7 @@ app.config.update(
 #   SESSION_REDIS = Redis(host='redis', port=6379),
     SECRET_KEY = 'f4ea57d983e77f074fb9209c425b238b56bdcc8c92d32c4f',
     SESSION_PERMANENT = False,
-    EXPLAIN_TEMPLATE_LOADING = True,
+#   EXPLAIN_TEMPLATE_LOADING = True,
 )
 
 Bootstrap(app)
@@ -24,13 +24,12 @@ Session(app)
 @app.route("/", methods=['GET','POST'])
 @app.route("/home", methods=['GET','POST'])
 def home():
-
-    #ensure we begin with a clean session
-    for key in list(session):
-        del session[key]
-
     form = LeagueForm(request.form)
+
     if request.method == 'GET':
+        #ensure we begin with a clean session
+        for key in list(session):
+            del session[key]
         return render_template('league.html', form=form)
 
     for fld in form._fields:
@@ -152,4 +151,4 @@ def draft_player():
     return render_template('draft_player.html', league=league)
 
 
-app.run(port=5001, host='0.0.0.0', debug=True)
+app.run(port=5002, host='0.0.0.0', debug=True)

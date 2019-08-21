@@ -1,7 +1,7 @@
 {% macro display_position(league, pos, name) %}
 	{% for rank, player_obj in league.players.items() %}
 		{% if player_obj.pick|int < 1 and player_obj.position == pos %}
-			<button class="badge badge-pill badge-primary" type="submit" value="{{ rank }}" name="{{ name }}">
+			<button class="badge badge-pill badge-primary" type="submit" value="{{ rank }}" name="{{ name }}" style="height:22px;width:180px;font-size:8pt">
 				{{ player_obj.overall_rank }} {{ player_obj.position_rank }} {{ player_obj.player_name }} {{ player_obj.nfl_team }}
 			</button>
 		{% endif %}

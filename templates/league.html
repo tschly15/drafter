@@ -1,39 +1,36 @@
 {% extends 'base.html' %}
 
 {% block app_content %}
-	<div class="container">
 	<form method="post">
-			<table class="table table-borderless">
-				<tbody>
-					<tr>
-						<td scope="col">Number of Teams:</td>
-						<td margin-top="10pt">
-							<dl>{{ form._fields['num_teams'] }}</dl>
-						</td>
-						<td scope="col">Allow Keepers:</td>
-						<td>
-							<dl>{{ form._fields['include_keepers'] }}</dl>
-						</td>
-					</tr>
+		<table class="table table-sm">
+			<tbody>
+				<tr>
+					<td class="col-md-1">Number of Teams:</td>
+					<td class="col-md-1">
+						<dl>{{ form._fields['num_teams'] }}</dl>
+					</td>
+					<td class="col-md-1">Allow Keepers:</td>
+					<td class="col-md-1">
+						<dl>{{ form._fields['include_keepers'] }}</dl>
+					</td>
+				</tr>
 
-					<tr>
-						<td>Positions:</td>
-					</tr>
+				<tr>
+					<td>Positions:</td>
+				</tr>
 
-					{% for k, v in form._fields.iteritems() %}
-						{% if k not in ('num_teams','include_keepers') %}
-							<tr>
-								<td>{{ v.label }}:</td>
-								<td><dl>{{ v }}</dl></td>
-							</tr>
-						{% endif %}
-					{% endfor %}
+				{% for k, v in form._fields.iteritems() %}
+					{% if k not in ('num_teams','include_keepers') %}
+						<tr>
+							<td>{{ v.label }}:</td>
+							<td><dl>{{ v }}</dl></td>
+						</tr>
+					{% endif %}
+				{% endfor %}
 
-				</tbody>
-			</table>
-			
-			<p><input type=submit value=Register></p>
-		</div>
-	</form>
-	</div>
+			</tbody>
+		</table>
+            
+		<button type="submit" class="btn btn-primary" value="Register">Register League</button>
+    </form>
 {% endblock %}

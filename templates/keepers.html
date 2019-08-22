@@ -2,7 +2,6 @@
 {% import 'macros.jinja' as macros %}
 
 {% block app_content %}
-	<div class="container">
 	<form method="post">
 		{% if 'keeper_team_id' not in session %}
 			<p>Select the team</p>
@@ -18,23 +17,7 @@
 
 		{% elif 'keeper_player_rank' not in session %}
 			<p>Select the player</p>
-			<div class="row">
-				<div class="col-md-2">
-					{{ macros.display_position(league, "QB", "user_selected") }}
-				</div>
-				<div class="col-md-3">
-					{{ macros.display_position(league, "RB", "user_selected") }}
-				</div>
-				<div class="col-md-3">
-					{{ macros.display_position(league, "WR", "user_selected") }}
-				</div>
-				<div class="col-md-2">
-					{{ macros.display_position(league, "TE", "user_selected") }}
-				</div>
-				<div class="col-md-2">
-					{{ macros.display_position(league, "DST", "user_selected") }}
-				</div>
-			</div>
+			{{ macros.display_available_players(league, "user_selected") }}
 		{% endif %}
 	</form>
 	
@@ -50,5 +33,4 @@
 		<button type="submit" class="btn btn-primary" name="confirmed" value="True">Confirm</button>
 		<button type="submit" class="btn btn-danger" name="start_over" value="True">Start Over</button>
 	</form>
-	</div>
 {% endblock %}

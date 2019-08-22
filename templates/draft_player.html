@@ -2,60 +2,36 @@
 {% import 'macros.jinja' as macros %}
 
 {% block app_content %}
-	<div class="well">
 
-		<table class="table table-sm">
-			<thead>
-				<tr padding="2px">
-					<th>
-						<form action="" method="post" name="undo" class="form">
-							<button class="btn btn-primary" type="submit" value="UNDO" name="undo_button">Undo</button>
-						</form>
-					</th>
+	<table class="table table-sm">
+		<thead>
+			<tr>
+				<th>
+					<form action="" method="post" name="undo" class="form">
+						<button class="btn btn-primary" type="submit" value="UNDO" name="undo_button">Undo</button>
+					</form>
+				</th>
+				{% for team in league.teams|sort(attribute='team_id') %}
+					<th>{{ team.team_name }}</td>
+				{% endfor %}
+			</tr>
+		</thead>
+		<tbody>
+			{% for idx, pos in league.positions %}
+				<tr>
+					<td>{{ pos }}</td>
 					{% for team in league.teams|sort(attribute='team_id') %}
-						<th>{{ team.team_name }}</td>
+						<td>{{ team.get_player(league, pos, idx) }}</td>
 					{% endfor %}
 				</tr>
-			</thead>
-			<tbody>
-				{% for idx, pos in league.positions %}
-					<tr padding="2px" font-size="4pt">
-						<td>{{ pos }}</td>
-						{% for team in league.teams|sort(attribute='team_id') %}
-							<td>{{ team.get_player(league, pos, idx) }}</td>
-						{% endfor %}
-					</tr>
-				{% endfor %}
-			</tbody>
-		</table>
+			{% endfor %}
+		</tbody>
+	</table>
 
 
+	<div class="well">
 		<form action="" method="post" name="home" class="form">
-			<div class="row">
-				<div class="col-md-5">
-					<div class="row">
-						<div class="col-md-6">
-							{{ macros.display_position(league, "QB", "select_by_rank") }}
-						</div>
-						<div class="col-md-6">
-							{{ macros.display_position(league, "RB", "select_by_rank") }}
-						</div>
-					</div>
-				</div>
-				<div class="col-md-7">
-					<div class="row">
-						<div class="col-md-4">
-							{{ macros.display_position(league, "WR", "select_by_rank") }}
-						</div>
-						<div class="col-md-4">
-							{{ macros.display_position(league, "TE", "select_by_rank") }}
-						</div>
-						<div class="col-md-4">
-							{{ macros.display_position(league, "DST", "select_by_rank") }}
-						</div>
-					</div>
-				</div>
-			</div>
+			{{ macros.display_available_players(league, "select_by_rank") }}
 		</form>
 	</div>
 

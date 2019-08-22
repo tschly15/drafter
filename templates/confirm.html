@@ -1,17 +1,15 @@
 {% extends 'base.html' %}
 
 {% block app_content %}
-	<div class="container">
-		<ul class="list-group">
-		{% for key in session %}
-			{% if key.startswith('settings_') %}
-				<li class="list-group-item">
-					{{ session[key][0] }} {{ session[key][1] }}
-				</li>
-			{% endif %}
-		{% endfor %}
-		</ul>
-	</div>
+	<ul class="list-group">
+	{% for key in session %}
+		{% if key.startswith('settings_') %}
+			<li class="list-group-item">
+				{{ session[key][0] }} {{ session[key][1] }}
+			</li>
+		{% endif %}
+	{% endfor %}
+	</ul>
 
 	<form method="post" name="my_form_button">
 		<button type="submit" class="btn btn-primary" name="confirmed" value="True">Confirm</button>

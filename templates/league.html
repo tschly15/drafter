@@ -19,7 +19,7 @@
 					<td>Positions:</td>
 				</tr>
 
-				{% for k, v in form._fields.iteritems() %}
+				{% for k, v in form._fields.items() %}
 					{% if k not in ('num_teams','include_keepers') %}
 						<tr>
 							<td>{{ v.label }}:</td>
@@ -32,5 +32,5 @@
 		</table>
             
 		<button type="submit" class="btn btn-primary" value="Register">Register League</button>
-    </form>
+	</form>
 {% endblock %}

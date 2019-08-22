@@ -1,9 +1,43 @@
-{% macro display_position(league, pos, name) %}
+{% macro display_position(league, pos, name, status="primary") %}
+	{% set badge_class = "badge badge-pill badge-" ~ status %}
 	{% for rank, player_obj in league.players.items() %}
 		{% if player_obj.pick|int < 1 and player_obj.position == pos %}
-			<button class="badge badge-pill badge-primary" type="submit" value="{{ rank }}" name="{{ name }}" style="height:22px;width:180px;font-size:8pt">
+			<button class="{{ badge_class }}" type="submit" value="{{ rank }}" name="{{ name }}" style="height:22px;width:200px;font-size:8.5pt">
 				{{ player_obj.overall_rank }} {{ player_obj.position_rank }} {{ player_obj.player_name }} {{ player_obj.nfl_team }}
 			</button>
 		{% endif %}
 	{% endfor %}
+{% endmacro %}
+
+{% macro display_available_players(league, key) %}
+	<div class="row">
+		<div class="col-md-5">
+			<div class="row">
+				<div class="col-md-6">
+					<p>Available QB</p>
+					{{ display_position(league, "QB", key, status="danger") }}
+				</div>
+				<div class="col-md-6">
+					<p>Available RB</p>
+					{{ display_position(league, "RB", key) }}
+				</div>
+			</div>
+		</div>
+		<div class="col-md-7">
+			<div class="row">
+				<div class="col-md-4">
+					<p>Available WR</p>
+					{{ display_position(league, "WR", key) }}
+				</div>
+				<div class="col-md-4">
+					<p>Available TE</p>
+					{{ display_position(league, "TE", key) }}
+				</div>
+				<div class="col-md-4">
+					<p>Available DST</p>
+					{{ display_position(league, "DST", key) }}
+				</div>
+			</div>
+		</div>
+	</div>
 {% endmacro %}
